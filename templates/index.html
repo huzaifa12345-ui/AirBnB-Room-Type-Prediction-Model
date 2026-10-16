@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101828">
+  <title>Airbnb Room Type Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+  <script src="{{ url_for('static', path='/script.js') }}" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Airbnb Room Predictor home">
+        <span class="brand-mark">A</span>
+        <span>StayScope<span class="brand-dot">.</span></span>
+      </a>
+      <span class="status-pill"><span class="status-dot"></span> ML PREDICTION TOOL</span>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> NEW YORK CITY · AIRBNB 2019</div>
+          <h1>Find the likely<br><span>room type.</span></h1>
+          <p>Enter a listing's details and let your machine learning model predict whether it's an entire home, private room, or shared room.</p>
+          <div class="hero-facts">
+            <div><strong>2019</strong><span>Dataset</span></div>
+            <div><strong>Random Forest</strong><span>Classifier</span></div>
+            <div><strong>3 types</strong><span>Room categories</span></div>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="art-card">
+            <div class="art-window"><span></span><span></span><span></span></div>
+            <div class="art-room">
+              <div class="art-sun"></div>
+              <div class="art-wall"></div>
+              <div class="art-bed"><div class="pillow"></div></div>
+              <div class="art-plant"><i></i><i></i><i></i><b></b></div>
+            </div>
+            <div class="art-card-footer"><span class="mini-avatar">NY</span><div><b>NYC listing</b><small>Ready to classify</small></div><span class="sparkle">✦</span></div>
+          </div>
+          <div class="floating-tag tag-top">Smart predictions <span>✦</span></div>
+          <div class="floating-tag tag-bottom"><span class="tag-dot"></span> Model pipeline ready</div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="form-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">LISTING DETAILS</span>
+              <h2>Describe your listing</h2>
+              <p>Complete the fields below to generate a prediction.</p>
+            </div>
+            <span class="step-number">01 <span>/ 02</span></span>
+          </div>
+
+          {% if not model_ready %}
+          <div class="notice warning">The model file is not loaded yet. Put <code>model_pipeline.pkl</code> beside <code>main.py</code>, then restart the server.</div>
+          {% endif %}
+
+          <form id="prediction-form">
+            <div class="form-section-title"><span class="section-icon">⌖</span> Location</div>
+            <div class="field-grid two-col">
+              <label class="field"><span>Neighbourhood group</span>
+                <select name="neighbourhood_group" required>
+                  <option value="Manhattan">Manhattan</option>
+                  <option value="Brooklyn">Brooklyn</option>
+                  <option value="Queens">Queens</option>
+                  <option value="Bronx">Bronx</option>
+                  <option value="Staten Island">Staten Island</option>
+                </select>
+              </label>
+              <label class="field"><span>Neighbourhood</span>
+                <input name="neighbourhood" list="neighbourhood-options" value="Midtown" required placeholder="e.g. Midtown">
+                <datalist id="neighbourhood-options">
+                  <option value="Midtown"><option value="Harlem"><option value="Bedford-Stuyvesant">
+                  <option value="Williamsburg"><option value="Upper West Side"><option value="Hell's Kitchen">
+                  <option value="East Village"><option value="Bushwick"><option value="Chelsea">
+                  <option value="Crown Heights"><option value="Astoria"><option value="Greenpoint">
+                </datalist>
+              </label>
+              <label class="field"><span>Latitude</span><input type="number" name="latitude" min="-90" max="90" step="any" value="40.7580" required></label>
+              <label class="field"><span>Longitude</span><input type="number" name="longitude" min="-180" max="180" step="any" value="-73.9855" required></label>
+            </div>
+
+            <div class="form-section-title"><span class="section-icon">$</span> Pricing & stay</div>
+            <div class="field-grid three-col">
+              <label class="field"><span>Price per night (USD)</span><div class="input-prefix"><b>$</b><input type="number" name="price" min="0" step="any" value="150" required></div></label>
+              <label class="field"><span>Minimum nights</span><input type="number" name="minimum_nights" min="1" step="1" value="2" required></label>
+              <label class="field"><span>Availability (days/year)</span><input type="number" name="availability_365" min="0" max="365" step="1" value="180" required></label>
+            </div>
+
+            <div class="form-section-title"><span class="section-icon">✧</span> Reviews & host</div>
+            <div class="field-grid three-col">
+              <label class="field"><span>Total reviews</span><input type="number" name="number_of_reviews" min="0" step="1" value="25" required></label>
+              <label class="field"><span>Reviews per month</span><input type="number" name="reviews_per_month" min="0" step="any" value="1.2" required></label>
+              <label class="field"><span>Host listing count</span><input type="number" name="calculated_host_listings_count" min="1" step="1" value="1" required></label>
+            </div>
+
+            <div class="form-actions">
+              <p><span class="lock-icon">◇</span> Your inputs are used to make this prediction.</p>
+              <button type="submit" id="predict-button"><span>Predict room type</span><span class="button-arrow">↗</span></button>
+            </div>
+          </form>
+        </div>
+
+        <aside class="result-panel" aria-live="polite">
+          <div class="result-topline"><span class="section-kicker">PREDICTION OUTPUT</span><span class="result-indicator"><span></span> LIVE</span></div>
+          <div id="empty-result" class="empty-result">
+            <div class="result-illustration">
+              <div class="illustration-ring"></div>
+              <div class="illustration-house"><div class="house-roof"></div><div class="house-body"><div class="house-door"></div><div class="house-window"></div></div></div>
+              <span class="illustration-star star-a">✦</span><span class="illustration-star star-b">✧</span>
+            </div>
+            <h3>Your result will<br>appear here.</h3>
+            <p>Fill in the listing details and run the model to see the predicted room category.</p>
+            <div class="result-steps"><div><span>1</span> Enter listing details</div><div><span>2</span> Run the ML pipeline</div><div><span>3</span> Review the prediction</div></div>
+          </div>
+          <div id="prediction-result" class="prediction-result hidden">
+            <div class="result-check">✓</div>
+            <span class="section-kicker">PREDICTED ROOM TYPE</span>
+            <h3 id="predicted-label">Private room</h3>
+            <p id="result-description">Prediction generated by your trained Random Forest pipeline.</p>
+            <div class="confidence-heading"><span>Model class probabilities</span><span id="top-confidence">—</span></div>
+            <div id="probability-list" class="probability-list"></div>
+            <div class="result-disclaimer">Probabilities are model estimates, not guarantees. Results depend on the training data and model quality.</div>
+            <button type="button" id="reset-button" class="secondary-button">Make another prediction ↗</button>
+          </div>
+          <div id="error-box" class="error-box hidden"></div>
+          <div class="panel-footnote"><span class="footnote-icon">i</span><span>Predictions are based on the AB_NYC_2019 dataset and the model you trained.</span></div>
+        </aside>
+      </section>
+
+      <section class="bottom-note">
+        <div class="bottom-icon">✳</div>
+        <div><h3>Built with machine learning</h3><p>FastAPI · Scikit-learn Pipeline · Random Forest · HTML · CSS · JavaScript</p></div>
+        <a href="/docs" target="_blank" rel="noreferrer">Explore API docs <span>↗</span></a>
+      </section>
+    </main>
+    <footer><span>StayScope <b>·</b> Airbnb Room Type Predictor</span><span>Educational ML project · Not affiliated with Airbnb</span></footer>
+  </div>
+</body>
+</html>
